@@ -111,7 +111,7 @@ def lambda_handler():
 
     return{
         'statusCode': 200,
-        'body': json.dump("Data processed")
+        'body': json.dumps("Data processed")
     }
     # connection = sqlite3.connect('Linkedin_db')
     # Linkedin_post_tbl.to_sql('Linkedin_post', connection, if_exists='replace', index = False)
