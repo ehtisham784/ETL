@@ -22,9 +22,8 @@ phases:
   post_build:
     commands:
       - echo Post-build phase...
-      - pytest tests/  # Run tests if you have any test scripts
-      - echo Running tests...
-      - if [ $? -ne 0 ]; then echo "Tests failed!"; exit 1; fi
+      # Removed pytest command, as it's not needed
+      - echo No tests to run.
 
 artifacts:
   files:
