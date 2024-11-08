@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12  # Use Python 3.12
+    commands:
+      - echo Installing dependencies...
+      - pip install -r requirements.txt  # Install dependencies from the requirements.txt file
+
+  pre_build:
+    commands:
+      - echo Pre-build phase...
+      - echo Checking if requirements.txt exists...
+      - if [ ! -f requirements.txt ]; then echo "requirements.txt not found!"; exit 1; fi
+
+  build:
+    commands:
+      - echo Building Lambda function...
+      - zip -r function.zip .  # Packages the Lambda function into a .zip file
+
+  post_build:
+    commands:
+      - echo Post-build phase...
+      - pytest tests/  # Run tests if you have any test scripts
+      - echo Running tests...
+      - if [ $? -ne 0 ]; then echo "Tests failed!"; exit 1; fi
+
+artifacts:
+  files:
+    - 'function.zip'  # Output the zip file containing the Lambda function code
+  base-directory: '.'  # Ensure it's the root directory of the Lambda function
+
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'  # Cache Python dependencies to speed up future builds
