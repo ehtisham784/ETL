@@ -6,8 +6,8 @@ import boto3
 import json
 
 # Assuming you have a DynamoDB client set up like this:
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('YourTableName')
+# dynamodb = boto3.resource('dynamodb')
+# table = dynamodb.Table('YourTableName')
 
 # This is the Lambda function that contains the actual business logic
 def my_lambda_function(event):
