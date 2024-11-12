@@ -1,28 +1,40 @@
 import api_testing
 from api_testing import function, pandas, table, json
-def lambda_handler():
-    # define the values for our parameters
+import api_testing
+import pandas as pd
+import boto3
+import json
+
+# Assuming you have a DynamoDB client set up like this:
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('YourTableName')
+
+# This is the Lambda function that contains the actual business logic
+def my_lambda_function(event):
+    # Define the parameters for users
     ehti_params = {"username": "ehtisham-hashmi-61a984181"}
     ali_params = {"username": "alisaqlain818"}
     zaid_params = {"username": "zaid-farooq-1b129a9b"}
 
-    # call the function
-    post_ehti = function(ehti_params)
-    post_zaid = function(zaid_params)
-    post_ali = function(ali_params)
+    # Call the function to get posts
+    post_ehti = api_testing.function(ehti_params)
+    post_zaid = api_testing.function(zaid_params)
+    post_ali = api_testing.function(ali_params)
 
+    # Combine the posts and create a pandas DataFrame
     combined_post = post_ehti + post_zaid + post_ali
-    Linkedin_post_tbl = pandas.DataFrame(combined_post)
+    Linkedin_post_tbl = pd.DataFrame(combined_post)
 
-    Linkedin_post_tbl['Post_ID'] = Linkedin_post_tbl.index+1
+    # Add a Post_ID column
+    Linkedin_post_tbl['Post_ID'] = Linkedin_post_tbl.index + 1
+
+    # Fill missing values with 0
     Linkedin_post_tbl.fillna(0, inplace=True)
 
-    # print(Linkedin_post_tbl)
-    # insert transformed data into dynamodb
-    #dynamo works with row and index
+    # Insert data into DynamoDB
     for row, index in Linkedin_post_tbl.iterrows():
         response_data = table.put_item(
-            item={
+            Item={
                 'Post_ID': int(row['Post_ID']),
                 'Total Reactions': int(row['Total Reactions']),
                 'Like Count': int(row['Like Count']),
@@ -34,9 +46,22 @@ def lambda_handler():
                 'Author Username': str(row['Author Username']),
             }
         )
-        print("Inserted data")
+        print("Inserted data:", response_data)
 
-    return{
+    return {
         'statusCode': 200,
-        'body': json.dumps("Data processed")
+        'body': json.dumps("Data processed successfully")
     }
+
+# This is the Lambda handler (entry point for AWS Lambda)
+def lambda_handler(event, context):
+    try:
+        # Call the actual Lambda function that does the processing
+        return my_lambda_function(event)
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps(f"Error processing data: {str(e)}")
+        }
